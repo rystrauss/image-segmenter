@@ -1,4 +1,3 @@
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -33,14 +32,11 @@ public class Segment {
 
         // Grab segmentation parameters
         Scanner console = new Scanner(System.in);
-        System.out.println("Please enter the name of the image file "
-                + "to be segmented (must end with .jpg): ");
+        System.out.println("Please enter the name of the image file to be segmented (must end with .jpg): ");
         String inputFile = console.nextLine();
-        System.out.println("Please provide a name for the output image "
-                + "file (must end with .jpg): ");
+        System.out.println("Please provide a name for the output image file (must end with .jpg): ");
         String outputFile = console.nextLine();
-        System.out.println("Please enter a value for the granularity "
-                + "parameter: ");
+        System.out.println("Please enter a value for the granularity parameter: ");
         double granularity = console.nextDouble();
 
         // Read in RGB data

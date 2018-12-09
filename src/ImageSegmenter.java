@@ -1,12 +1,119 @@
 import java.awt.Color;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * An implementation of the Felzenswalb-Huttenlocher image segmentation
+ * algorithm.
+ *
+ * @author Ryan Strauss
+ */
 public class ImageSegmenter {
 
-    public static Color[][] segment(Color[][] rgbArray, double granularity) {
-        // COMPLETE ME!
+    /**
+     * Builds a Pixel array from the supplied Color array.
+     *
+     * @param rgbArray the Color array to make Pixels from
+     * @return a Pixel array containing the Colors from the supplied Color array
+     */
+    private static Pixel[][] buildPixelArray(Color[][] rgbArray) {
+        int height = rgbArray.length;
+        int width = rgbArray[0].length;
 
-        // placeholder to ensure compilation -- replace this when you're done!
-        return rgbArray;
+        Pixel[][] pixelArray = new Pixel[height][width];
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                pixelArray[i][j] = new Pixel(i, j, rgbArray[i][j]);
+            }
+        }
+
+        return pixelArray;
+    }
+
+    /**
+     * Constructs and a sorted list of edges corresponding to the grid
+     * graph on the given pixel array.
+     *
+     * @param pixelArray the pixels representing the grid graph
+     * @return a list of sorted edges in the grid graph
+     */
+    private static List<Edge> buildEdgeSet(Pixel[][] pixelArray) {
+        final int[] XDELTA = {0, 1, 1, 1};
+        final int[] YDELTA = {1, 1, 0, -1};
+
+        List<Edge> edges = new LinkedList<>();
+
+        int height = pixelArray.length;
+        int width = pixelArray[0].length;
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                Pixel p1 = pixelArray[i][j];
+                for (int k = 0; k < XDELTA.length; k++) {
+                    int x = j + XDELTA[k];
+                    int y = i + YDELTA[k];
+                    if (y >= 0 && y < height && x < width) {
+                        Pixel p2 = pixelArray[y][x];
+                        edges.add(new Edge(p1, p2));
+                    }
+                }
+            }
+        }
+
+        Collections.sort(edges);
+        return edges;
+    }
+
+    /**
+     * Returns an RGB array colored by the provided segments.
+     *
+     * @param segments a collection of Pixel segments
+     * @param height the height of the image
+     * @param width the width of the image
+     * @return the new Color array
+     */
+    private static Color[][] recolor(Map<Pixel, List<Pixel>> segments, int height, int width) {
+        Color[][] newRaster = new Color[height][width];
+        ColorPicker generator = new ColorPicker();
+
+        for (Pixel key : segments.keySet()) {
+            Color newColor = generator.nextColor();
+            for (Pixel pixel : segments.get(key))
+                newRaster[pixel.getRow()][pixel.getCol()] = newColor;
+        }
+
+        return newRaster;
+    }
+
+    /**
+     * Returns the segmented version of the input image.
+     *
+     * @param rgbArray the input image
+     * @param granularity the granularity parameter to use for segmentation
+     * @return the segmented image
+     */
+    public static Color[][] segment(Color[][] rgbArray, double granularity) {
+        Pixel[][] pixelArray = buildPixelArray(rgbArray);
+        List<Edge> edges = buildEdgeSet(pixelArray);
+        DisjointSetForest forest = new DisjointSetForest(pixelArray);
+
+        for (Edge e : edges) {
+            Pixel rep1 = forest.find(e.getFirstPixel());
+            Pixel rep2 = forest.find(e.getSecondPixel());
+            if (rep1 != rep2) {
+                double bound1 = forest.getInternalDistance(rep1) + (granularity / forest.getSize(rep1));
+                double bound2 = forest.getInternalDistance(rep2) + (granularity / forest.getSize(rep2));
+                double threshold = Math.min(bound1, bound2);
+
+                if (e.getWeight() < threshold)
+                    forest.union(rep1, rep2, e.getWeight());
+            }
+        }
+
+        return recolor(forest.getSegments(), rgbArray.length, rgbArray[0].length);
     }
 
 }
