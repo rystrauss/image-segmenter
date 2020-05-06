@@ -1,7 +1,4 @@
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class for representing pixel objects as a disjoint set forest.
@@ -57,7 +54,7 @@ public class DisjointSetForest {
      * @return the pixel's segment's representative pixel
      */
     public Pixel find(Pixel pixel) {
-        List<Node> path = new LinkedList<>();
+        List<Node> path = new ArrayList<>();
         Node current = pixelMap[pixel.getRow()][pixel.getCol()];
 
         if (current == null)
@@ -108,19 +105,19 @@ public class DisjointSetForest {
      *
      * @return a Map from the representative pixels to a List of the pixels in the segment
      */
-    public Map<Pixel, List<Pixel>> getSegments() {
+    public Collection<List<Pixel>> getSegments() {
         Map<Pixel, List<Pixel>> segments = new HashMap<>();
 
         for (int i = 0; i < pixelMap.length; i++) {
             for (int j = 0; j < pixelMap[0].length; j++) {
                 Pixel rep = find(pixelMap[i][j].pixel);
                 if (!segments.containsKey(rep))
-                    segments.put(rep, new LinkedList<>());
+                    segments.put(rep, new ArrayList<>());
                 segments.get(rep).add(pixelMap[i][j].pixel);
             }
         }
 
-        return segments;
+        return segments.values();
     }
 
     /**

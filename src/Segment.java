@@ -1,7 +1,8 @@
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 
 
@@ -13,7 +14,6 @@ import java.util.Scanner;
  */
 public class Segment {
 
-    private final static int NUM_COLOR_CHANNELS = 3;
     private final static int MAX_COLOR_DEPTH = 256;
     private final static int[] OFFSETS = {24, 16, 8, 0};
 

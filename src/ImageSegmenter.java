@@ -1,5 +1,8 @@
-import java.awt.Color;
-import java.util.*;
+import java.awt.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * An implementation of the Felzenswalb-Huttenlocher image segmentation
@@ -67,19 +70,19 @@ public class ImageSegmenter {
      * Returns an RGB array colored by the provided segments.
      *
      * @param segments a collection of Pixel segments
-     * @param height the height of the image
-     * @param width the width of the image
+     * @param height   the height of the image
+     * @param width    the width of the image
      * @return the new Color array
      */
-    private static Color[][] recolor(Map<Pixel, List<Pixel>> segments, int height, int width) {
+    private static Color[][] recolor(Collection<List<Pixel>> segments, int height, int width) {
         Color[][] newRaster = new Color[height][width];
         ColorPicker generator = new ColorPicker();
 
-        for (Pixel key : segments.keySet()) {
+        segments.stream().parallel().forEach(pixels -> {
             Color newColor = generator.nextColor();
-            for (Pixel pixel : segments.get(key))
+            for (Pixel pixel : pixels)
                 newRaster[pixel.getRow()][pixel.getCol()] = newColor;
-        }
+        });
 
         return newRaster;
     }
@@ -87,13 +90,17 @@ public class ImageSegmenter {
     /**
      * Returns the segmented version of the input image.
      *
-     * @param rgbArray the input image
+     * @param rgbArray    the input image
      * @param granularity the granularity parameter to use for segmentation
      * @return the segmented image
      */
     public static Color[][] segment(Color[][] rgbArray, double granularity) {
+        System.out.println("Segmenting image...");
+
         Pixel[][] pixelArray = buildPixelArray(rgbArray);
         SortedSet<Edge> edges = buildEdgeSet(pixelArray);
+        System.out.println("Created " + edges.size() + " edges.");
+
         DisjointSetForest forest = new DisjointSetForest(pixelArray);
 
         for (Edge e : edges) {
@@ -109,7 +116,10 @@ public class ImageSegmenter {
             }
         }
 
-        return recolor(forest.getSegments(), rgbArray.length, rgbArray[0].length);
+        Collection<List<Pixel>> segments = forest.getSegments();
+        System.out.println("Created " + segments.size() + " segments.");
+
+        return recolor(segments, rgbArray.length, rgbArray[0].length);
     }
 
 }
