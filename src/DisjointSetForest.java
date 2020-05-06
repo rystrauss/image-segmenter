@@ -10,8 +10,7 @@ import java.util.Map;
  */
 public class DisjointSetForest {
 
-    private Node[][] pixelMap;
-    private int numSegments;
+    private final Node[][] pixelMap;
 
     /**
      * Class for representing a single node within the disjoint set forest.
@@ -49,8 +48,6 @@ public class DisjointSetForest {
                 pixelMap[i][j] = new Node(pixelArray[i][j]);
             }
         }
-
-        this.numSegments = height * width;
     }
 
     /**
@@ -104,7 +101,6 @@ public class DisjointSetForest {
             n2.internalDistance = internalDistance;
         }
 
-        this.numSegments--;
     }
 
     /**

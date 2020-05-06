@@ -1,8 +1,5 @@
 import java.awt.Color;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An implementation of the Felzenswalb-Huttenlocher image segmentation
@@ -40,11 +37,11 @@ public class ImageSegmenter {
      * @param pixelArray the pixels representing the grid graph
      * @return a list of sorted edges in the grid graph
      */
-    private static List<Edge> buildEdgeSet(Pixel[][] pixelArray) {
+    private static SortedSet<Edge> buildEdgeSet(Pixel[][] pixelArray) {
         final int[] XDELTA = {0, 1, 1, 1};
         final int[] YDELTA = {1, 1, 0, -1};
 
-        List<Edge> edges = new LinkedList<>();
+        SortedSet<Edge> edges = new TreeSet<>();
 
         int height = pixelArray.length;
         int width = pixelArray[0].length;
@@ -63,7 +60,6 @@ public class ImageSegmenter {
             }
         }
 
-        Collections.sort(edges);
         return edges;
     }
 
@@ -97,7 +93,7 @@ public class ImageSegmenter {
      */
     public static Color[][] segment(Color[][] rgbArray, double granularity) {
         Pixel[][] pixelArray = buildPixelArray(rgbArray);
-        List<Edge> edges = buildEdgeSet(pixelArray);
+        SortedSet<Edge> edges = buildEdgeSet(pixelArray);
         DisjointSetForest forest = new DisjointSetForest(pixelArray);
 
         for (Edge e : edges) {
